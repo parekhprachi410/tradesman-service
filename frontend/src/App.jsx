@@ -6,6 +6,10 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Tradesmen from "./pages/Tradesmen";
 import Dashboard from "./pages/Dashboard";
+import ProtectedRoute from "./components/ProtectedRoute";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
+import NotificationBell from "./components/NotificationBell";
 
 export default function App()
 {
@@ -29,11 +33,17 @@ export default function App()
     {
         loadUser();
 
-        window.addEventListener("authChange", loadUser);
+        window.addEventListener(
+            "authChange",
+            loadUser
+        );
 
         return () =>
         {
-            window.removeEventListener("authChange", loadUser);
+            window.removeEventListener(
+                "authChange",
+                loadUser
+            );
         };
     }, []);
 
@@ -42,7 +52,9 @@ export default function App()
         localStorage.removeItem("token");
         localStorage.removeItem("user");
 
-        window.dispatchEvent(new Event("authChange"));
+        window.dispatchEvent(
+            new Event("authChange")
+        );
 
         window.location.href = "/";
     }
@@ -51,17 +63,29 @@ export default function App()
         <BrowserRouter>
             <nav className="bg-slate-950 text-white px-8 py-5">
                 <div className="max-w-7xl mx-auto flex justify-between items-center">
-                    <Link to="/" className="text-3xl font-bold">
+
+                    <Link
+                        to="/"
+                        className="text-3xl font-bold"
+                    >
                         TradeLink
                     </Link>
 
                     <div className="flex gap-8 items-center">
-                        <Link to="/">Home</Link>
-                        <Link to="/tradesmen">Tradesmen</Link>
+
+                        <Link to="/">
+                            Home
+                        </Link>
+
+                        <Link to="/tradesmen">
+                            Tradesmen
+                        </Link>
 
                         {
                             user ? (
                                 <>
+                                    <NotificationBell />
+
                                     <Link to="/dashboard">
                                         Dashboard
                                     </Link>
@@ -75,21 +99,55 @@ export default function App()
                                 </>
                             ) : (
                                 <>
-                                    <Link to="/login">Login</Link>
-                                    <Link to="/register">Register</Link>
+                                    <Link to="/login">
+                                        Login
+                                    </Link>
+
+                                    <Link to="/register">
+                                        Register
+                                    </Link>
                                 </>
                             )
                         }
+
                     </div>
+
                 </div>
             </nav>
 
             <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route path="/tradesmen" element={<Tradesmen />} />
-                <Route path="/dashboard" element={<Dashboard />} />
+                <Route
+                    path="/"
+                    element={<Home />}
+                />
+
+                <Route
+                    path="/login"
+                    element={<Login />}
+                />
+
+                <Route
+                    path="/register"
+                    element={<Register />}
+                />
+
+                <Route
+                    path="/tradesmen"
+                    element={<Tradesmen />}
+                />
+
+                <Route path="/forgot-password" element={<ForgotPassword />} />
+
+                <Route path="/reset-password/:token" element={<ResetPassword />} />
+
+                <Route
+                    path="/dashboard"
+                    element={
+                        <ProtectedRoute>
+                            <Dashboard />
+                        </ProtectedRoute>
+                    }
+                />
             </Routes>
         </BrowserRouter>
     );

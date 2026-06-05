@@ -14,10 +14,103 @@ export default function Dashboard()
     const [comment, setComment] = useState("");
     const [message, setMessage] = useState("");
 
+    const [tradesmanProfile, setTradesmanProfile] = useState(null);
+
+    const [availabilityForm, setAvailabilityForm] = useState({
+        availabilityDays: [],
+        availableFrom: "09:00",
+        availableTo: "18:00"
+    });
+
+    const days = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+    ];
+
     useEffect(() =>
     {
         fetchBookings();
+
+        if (user?.role === "tradesman")
+        {
+            fetchTradesmanProfile();
+        }
     }, []);
+
+    async function fetchTradesmanProfile()
+    {
+        try
+        {
+            const response = await api.get(
+                `/tradesmen/user/${user.id}`
+            );
+
+            setTradesmanProfile(response.data);
+
+            setAvailabilityForm({
+                availabilityDays: response.data.availabilityDays || [],
+                availableFrom: response.data.availableFrom || "09:00",
+                availableTo: response.data.availableTo || "18:00"
+            });
+        }
+        catch (error)
+        {
+            console.log(error);
+        }
+    }
+
+    function handleDayChange(day)
+    {
+        if (availabilityForm.availabilityDays.includes(day))
+        {
+            setAvailabilityForm({
+                ...availabilityForm,
+                availabilityDays:
+                availabilityForm.availabilityDays.filter(
+                    (item) => item !== day
+                )
+            });
+        }
+        else
+        {
+            setAvailabilityForm({
+                ...availabilityForm,
+                availabilityDays:
+                [
+                    ...availabilityForm.availabilityDays,
+                    day
+                ]
+            });
+        }
+    }
+
+    async function updateAvailability(e)
+    {
+        e.preventDefault();
+
+        try
+        {
+            const response = await api.put(
+                `/tradesmen/availability/${user.id}`,
+                availabilityForm
+            );
+
+            setMessage(response.data.message);
+            setTradesmanProfile(response.data.tradesman);
+        }
+        catch (error)
+        {
+            setMessage(
+                error.response?.data?.message ||
+                "Failed to update availability"
+            );
+        }
+    }
 
     async function fetchBookings()
     {
@@ -80,6 +173,8 @@ export default function Dashboard()
     {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
+
+        window.dispatchEvent(new Event("authChange"));
 
         navigate("/login");
     }
@@ -309,6 +404,117 @@ export default function Dashboard()
                     message && (
                         <div className="bg-blue-100 text-blue-800 p-4 rounded-xl mb-6">
                             {message}
+                        </div>
+                    )
+                }
+
+                {
+                    user.role === "tradesman" && (
+                        <div className="bg-white rounded-2xl shadow-lg p-8 mb-8">
+
+                            <h2 className="text-3xl font-bold mb-4">
+                                Update Availability
+                            </h2>
+
+                            <p className="text-slate-600 mb-6">
+                                Choose the days and time range when customers can book you.
+                            </p>
+
+                            {
+                                tradesmanProfile && (
+                                    <p className="text-slate-500 mb-4">
+                                        Current:
+                                        {" "}
+                                        {
+                                            tradesmanProfile.availabilityDays?.length > 0
+                                            ? tradesmanProfile.availabilityDays.join(", ")
+                                            : "No days selected"
+                                        }
+                                        {" "}
+                                        |
+                                        {" "}
+                                        {tradesmanProfile.availableFrom || "09:00"}
+                                        {" - "}
+                                        {tradesmanProfile.availableTo || "18:00"}
+                                    </p>
+                                )
+                            }
+
+                            <form onSubmit={updateAvailability}>
+
+                                <div className="grid md:grid-cols-4 gap-3 mb-6">
+                                    {
+                                        days.map((day) =>
+                                        (
+                                            <label
+                                                key={day}
+                                                className="flex items-center gap-2 bg-slate-100 p-3 rounded-xl"
+                                            >
+                                                <input
+                                                    type="checkbox"
+                                                    checked={
+                                                        availabilityForm.availabilityDays.includes(day)
+                                                    }
+                                                    onChange={() => handleDayChange(day)}
+                                                />
+
+                                                {day}
+                                            </label>
+                                        ))
+                                    }
+                                </div>
+
+                                <div className="grid md:grid-cols-2 gap-4 mb-6">
+
+                                    <div>
+                                        <label className="text-sm text-slate-600">
+                                            Available From
+                                        </label>
+
+                                        <input
+                                            type="time"
+                                            value={availabilityForm.availableFrom}
+                                            onChange={(e) =>
+                                                setAvailabilityForm({
+                                                    ...availabilityForm,
+                                                    availableFrom: e.target.value
+                                                })
+                                            }
+                                            className="w-full p-3 border rounded-xl"
+                                            required
+                                        />
+                                    </div>
+
+                                    <div>
+                                        <label className="text-sm text-slate-600">
+                                            Available To
+                                        </label>
+
+                                        <input
+                                            type="time"
+                                            value={availabilityForm.availableTo}
+                                            onChange={(e) =>
+                                                setAvailabilityForm({
+                                                    ...availabilityForm,
+                                                    availableTo: e.target.value
+                                                })
+                                            }
+                                            className="w-full p-3 border rounded-xl"
+                                            required
+                                        />
+                                    </div>
+
+                                </div>
+
+                                <button
+                                    type="submit"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold"
+                                >
+                                    Save Availability
+                                </button>
+
+                            </form>
+
                         </div>
                     )
                 }

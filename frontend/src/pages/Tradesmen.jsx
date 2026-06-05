@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import api from "../services/api";
 import ReviewModal from "../components/ReviewModal";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function Tradesmen()
 {
@@ -12,6 +14,7 @@ export default function Tradesmen()
         searchParams.get("service") || ""
     );
     const [cityFilter, setCityFilter] = useState("");
+    const [selectedDate, setSelectedDate] = useState(null);
 
     const [selectedTradesman, setSelectedTradesman] = useState(null);
     const [reviewTradesman, setReviewTradesman] = useState(null);
@@ -42,6 +45,38 @@ export default function Tradesmen()
         }
     }
 
+    function formatDateLocal(date)
+    {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const day = String(date.getDate()).padStart(2, "0");
+
+        return `${year}-${month}-${day}`;
+    }
+
+    function isDateAvailable(date)
+    {
+        if (!selectedTradesman)
+        {
+            return false;
+        }
+
+        const dayName = date.toLocaleDateString("en-US", {
+            weekday: "long"
+        });
+
+        return selectedTradesman.availabilityDays?.includes(dayName);
+    }
+
+    function getDayName(dateString)
+    {
+        const date = new Date(dateString);
+
+        return date.toLocaleDateString("en-US", {
+            weekday: "long"
+        });
+    }
+
     async function handleBooking(e)
     {
         e.preventDefault();
@@ -49,6 +84,27 @@ export default function Tradesmen()
         if (!user)
         {
             setMessage("Please login before booking.");
+            return;
+        }
+
+        const bookingDay = getDayName(preferredDate);
+
+        if (!selectedTradesman.availabilityDays?.includes(bookingDay))
+        {
+            setMessage(
+                `${selectedTradesman.name} is not available on ${bookingDay}.`
+            );
+            return;
+        }
+
+        if (
+            preferredTime < selectedTradesman.availableFrom ||
+            preferredTime > selectedTradesman.availableTo
+        )
+        {
+            setMessage(
+                `${selectedTradesman.name} is available only from ${selectedTradesman.availableFrom} to ${selectedTradesman.availableTo}.`
+            );
             return;
         }
 
@@ -67,11 +123,15 @@ export default function Tradesmen()
             setIssue("");
             setPreferredDate("");
             setPreferredTime("");
+            setSelectedDate(null);
             setSelectedTradesman(null);
         }
         catch (error)
         {
-            setMessage("Booking failed.");
+            setMessage(
+                error.response?.data?.message ||
+                "Booking failed."
+            );
         }
     }
 
@@ -164,13 +224,23 @@ export default function Tradesmen()
                             >
                                 <div className="flex items-center gap-4 mb-4">
 
-                                    <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xl">
-                                        {
-                                            person.name
-                                            ? person.name.charAt(0).toUpperCase()
-                                            : person.service.charAt(0).toUpperCase()
-                                        }
-                                    </div>
+                                    {
+                                        person.profileImage ? (
+                                            <img
+                                                src={person.profileImage}
+                                                alt={person.name}
+                                                className="w-14 h-14 rounded-full object-cover border"
+                                            />
+                                        ) : (
+                                            <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xl">
+                                                {
+                                                    person.name
+                                                    ? person.name.charAt(0).toUpperCase()
+                                                    : person.service.charAt(0).toUpperCase()
+                                                }
+                                            </div>
+                                        )
+                                    }
 
                                     <div>
                                         <h2 className="text-xl font-bold text-slate-900">
@@ -202,6 +272,26 @@ export default function Tradesmen()
                                     {person.city}
                                 </p>
 
+                                <p className="text-slate-700 mt-2">
+                                    Available:
+                                    {" "}
+                                    {
+                                        person.availabilityDays?.length > 0
+                                        ? person.availabilityDays.join(", ")
+                                        : "Not added"
+                                    }
+                                </p>
+
+                                <p className="text-slate-700">
+                                    Time:
+                                    {" "}
+                                    {person.availableFrom || "09:00"}
+                                    {" "}
+                                    -
+                                    {" "}
+                                    {person.availableTo || "18:00"}
+                                </p>
+
                                 <p className="mt-3 text-slate-600">
                                     {person.description}
                                 </p>
@@ -231,6 +321,20 @@ export default function Tradesmen()
                                 >
                                     Book Now
                                 </button>
+
+                                {
+                                    person.phone && (
+                                        <a
+                                            href={`https://wa.me/91${person.phone}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="mt-3 block text-center w-full bg-green-600 hover:bg-green-700 text-white px-4 py-3 rounded-xl font-semibold"
+                                        >
+                                            WhatsApp
+                                        </a>
+                                    )
+                                }
+
                             </div>
                         ))
                     }
@@ -259,8 +363,22 @@ export default function Tradesmen()
                                 Book {selectedTradesman.name}
                             </h2>
 
-                            <p className="text-slate-600 mb-4">
+                            <p className="text-slate-600 mb-2">
                                 Service: {selectedTradesman.service}
+                            </p>
+
+                            <p className="text-slate-600 mb-4">
+                                Available:
+                                {" "}
+                                {selectedTradesman.availabilityDays?.join(", ")}
+                                {" "}
+                                |
+                                {" "}
+                                {selectedTradesman.availableFrom}
+                                {" "}
+                                -
+                                {" "}
+                                {selectedTradesman.availableTo}
                             </p>
 
                             <textarea
@@ -271,10 +389,16 @@ export default function Tradesmen()
                                 required
                             />
 
-                            <input
-                                type="date"
-                                value={preferredDate}
-                                onChange={(e) => setPreferredDate(e.target.value)}
+                            <DatePicker
+                                selected={selectedDate}
+                                onChange={(date) =>
+                                {
+                                    setSelectedDate(date);
+                                    setPreferredDate(formatDateLocal(date));
+                                }}
+                                filterDate={isDateAvailable}
+                                minDate={new Date()}
+                                placeholderText="Select available date"
                                 className="w-full p-3 border rounded-xl mb-4"
                                 required
                             />
@@ -304,6 +428,7 @@ export default function Tradesmen()
                                         setIssue("");
                                         setPreferredDate("");
                                         setPreferredTime("");
+                                        setSelectedDate(null);
                                     }}
                                     className="flex-1 bg-slate-300 py-3 rounded-xl"
                                 >

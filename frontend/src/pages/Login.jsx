@@ -11,6 +11,9 @@ export default function Login()
         password: ""
     });
 
+    const [showPassword, setShowPassword] =
+    useState(false);
+
     const [message, setMessage] = useState("");
 
     function handleChange(e)
@@ -41,8 +44,10 @@ export default function Login()
                 "user",
                 JSON.stringify(response.data.user)
             );
-            
-            window.dispatchEvent(new Event("authChange"));
+
+            window.dispatchEvent(
+                new Event("authChange")
+            );
 
             setMessage("Login successful");
 
@@ -81,15 +86,38 @@ export default function Login()
                     required
                 />
 
-                <input
-                    name="password"
-                    type="password"
-                    placeholder="Password"
-                    value={form.password}
-                    onChange={handleChange}
-                    className="w-full p-3 mb-4 border rounded-xl"
-                    required
-                />
+                <div className="relative mb-4">
+                    <input
+                        name="password"
+                        type={showPassword ? "text" : "password"}
+                        placeholder="Password"
+                        value={form.password}
+                        onChange={handleChange}
+                        className="w-full p-3 pr-20 border rounded-xl"
+                        required
+                    />
+
+                    <p
+                        onClick={() => navigate("/forgot-password")}
+                        className="text-right text-blue-600 cursor-pointer mb-4"
+                    >
+                        Forgot Password?
+                    </p>
+
+                    <button
+                        type="button"
+                        onClick={() =>
+                            setShowPassword(!showPassword)
+                        }
+                        className="absolute right-3 top-3 text-sm text-blue-600"
+                    >
+                        {
+                            showPassword
+                            ? "Hide"
+                            : "Show"
+                        }
+                    </button>
+                </div>
 
                 <button
                     type="submit"
