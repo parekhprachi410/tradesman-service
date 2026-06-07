@@ -2,6 +2,7 @@ const express = require("express");
 const Booking = require("../models/Booking");
 const Tradesman = require("../models/Tradesman");
 const Notification = require("../models/Notification");
+const sendEmail = require("../utils/sendEmail");
 
 const router = express.Router();
 
@@ -12,6 +13,90 @@ function getDayName(dateString)
     return date.toLocaleDateString("en-US", {
         weekday: "long"
     });
+}
+
+function getStatusEmailText(status)
+{
+    if (status === "accepted")
+    {
+        return {
+            subject: "Your TradeLink booking was accepted",
+            title: "Booking Accepted",
+            message: "Good news! Your booking request has been accepted by the tradesman."
+        };
+    }
+
+    if (status === "rejected")
+    {
+        return {
+            subject: "Your TradeLink booking was rejected",
+            title: "Booking Rejected",
+            message: "Your booking request was rejected by the tradesman."
+        };
+    }
+
+    if (status === "in-progress")
+    {
+        return {
+            subject: "Your TradeLink job has started",
+            title: "Work Started",
+            message: "The tradesman has started working on your booking."
+        };
+    }
+
+    if (status === "completed")
+    {
+        return {
+            subject: "Your TradeLink job was completed",
+            title: "Job Completed",
+            message: "Your booking has been marked as completed."
+        };
+    }
+
+    if (status === "cancelled")
+    {
+        return {
+            subject: "TradeLink booking cancelled",
+            title: "Booking Cancelled",
+            message: "A booking has been cancelled."
+        };
+    }
+
+    return null;
+}
+
+function bookingDetailsHtml(booking)
+{
+    return `
+        <div style="font-family:Arial,sans-serif;line-height:1.6;color:#111827;">
+            <h2 style="color:#0f172a;">${booking.title}</h2>
+
+            <p>${booking.message}</p>
+
+            <hr/>
+
+            <p><b>Service:</b> ${booking.service}</p>
+            <p><b>Issue:</b> ${booking.issue}</p>
+            <p><b>Date:</b> ${booking.preferredDate || "Not specified"}</p>
+            <p><b>Time:</b> ${booking.preferredTime || "Not specified"}</p>
+
+            ${
+                booking.customerName
+                ? `<p><b>Customer:</b> ${booking.customerName}</p>`
+                : ""
+            }
+
+            ${
+                booking.tradesmanName
+                ? `<p><b>Tradesman:</b> ${booking.tradesmanName}</p>`
+                : ""
+            }
+
+            <p style="margin-top:20px;">
+                Please login to your TradeLink dashboard for more details.
+            </p>
+        </div>
+    `;
 }
 
 router.post("/", async (req, res) =>
@@ -26,7 +111,8 @@ router.post("/", async (req, res) =>
             preferredTime
         } = req.body;
 
-        const selectedTradesman = await Tradesman.findById(tradesman);
+        const selectedTradesman = await Tradesman.findById(tradesman)
+        .populate("user", "name email");
 
         if (!selectedTradesman)
         {
@@ -63,11 +149,25 @@ router.post("/", async (req, res) =>
         });
 
         await Notification.create({
-            user: selectedTradesman.user,
+            user: selectedTradesman.user._id,
             type: "booking",
-            message:
-            `New booking request received for ${selectedTradesman.service}`
+            message: `New booking request received for ${selectedTradesman.service}`
         });
+
+        await sendEmail(
+            selectedTradesman.user.email,
+            "New TradeLink booking request",
+            bookingDetailsHtml({
+                title: "New Booking Request",
+                message: "You have received a new booking request on TradeLink.",
+                service: selectedTradesman.service,
+                issue,
+                preferredDate,
+                preferredTime,
+                customerName: "Customer",
+                tradesmanName: selectedTradesman.name
+            })
+        );
 
         res.status(201).json({
             message: "Booking created successfully",
@@ -133,14 +233,22 @@ router.put("/:id/status", async (req, res) =>
         }
 
         const booking = await Booking.findById(req.params.id)
-        .populate("customer")
+        .populate("customer", "name email")
         .populate({
             path: "tradesman",
             populate:
             {
-                path: "user"
+                path: "user",
+                select: "name email"
             }
         });
+
+        if (!booking)
+        {
+            return res.status(404).json({
+                message: "Booking not found"
+            });
+        }
 
         booking.status = status;
 
@@ -150,32 +258,27 @@ router.put("/:id/status", async (req, res) =>
 
         if (status === "accepted")
         {
-            notificationMessage =
-            `Your booking has been accepted`;
+            notificationMessage = "Your booking has been accepted";
         }
 
         if (status === "rejected")
         {
-            notificationMessage =
-            `Your booking has been rejected`;
+            notificationMessage = "Your booking has been rejected";
         }
 
         if (status === "in-progress")
         {
-            notificationMessage =
-            `Work has started on your booking`;
+            notificationMessage = "Work has started on your booking";
         }
 
         if (status === "completed")
         {
-            notificationMessage =
-            `Your booking has been completed`;
+            notificationMessage = "Your booking has been completed";
         }
 
         if (status === "cancelled")
         {
-            notificationMessage =
-            `Booking has been cancelled`;
+            notificationMessage = "Booking has been cancelled";
         }
 
         if (notificationMessage)
@@ -185,6 +288,26 @@ router.put("/:id/status", async (req, res) =>
                 type: "booking",
                 message: notificationMessage
             });
+        }
+
+        const emailInfo = getStatusEmailText(status);
+
+        if (emailInfo)
+        {
+            await sendEmail(
+                booking.customer.email,
+                emailInfo.subject,
+                bookingDetailsHtml({
+                    title: emailInfo.title,
+                    message: emailInfo.message,
+                    service: booking.tradesman?.service,
+                    issue: booking.issue,
+                    preferredDate: booking.preferredDate,
+                    preferredTime: booking.preferredTime,
+                    customerName: booking.customer?.name,
+                    tradesmanName: booking.tradesman?.name
+                })
+            );
         }
 
         res.json({
