@@ -261,13 +261,6 @@ export default function Dashboard()
             booking.status === "cancelled"
     ).length;
 
-    const estimatedRevenue = visibleBookings
-    .filter((booking) => booking.status === "completed")
-    .reduce((sum, booking) =>
-    {
-        return sum + Number(booking.tradesman?.hourlyRate || 0);
-    }, 0);
-
     const ratings = visibleBookings
     .filter((booking) => booking.tradesman?.rating)
     .map((booking) => Number(booking.tradesman.rating));
@@ -310,7 +303,7 @@ export default function Dashboard()
 
                 </div>
 
-                <div className="grid md:grid-cols-4 gap-5 mb-8">
+                <div className="grid md:grid-cols-3 gap-5 mb-8">
 
                     <div className="bg-white rounded-2xl shadow p-6">
                         <p className="text-slate-500">
@@ -339,24 +332,6 @@ export default function Dashboard()
 
                         <h2 className="text-3xl font-bold text-green-600">
                             {completedBookings}
-                        </h2>
-                    </div>
-
-                    <div className="bg-white rounded-2xl shadow p-6">
-                        <p className="text-slate-500">
-                            {
-                                user.role === "tradesman"
-                                ? "Revenue"
-                                : "Cancelled/Rejected"
-                            }
-                        </p>
-
-                        <h2 className="text-3xl font-bold text-purple-600">
-                            {
-                                user.role === "tradesman"
-                                ? `₹${estimatedRevenue}`
-                                : rejectedBookings
-                            }
                         </h2>
                     </div>
 
