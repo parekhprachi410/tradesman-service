@@ -6,6 +6,52 @@ export default function Register()
 {
     const navigate = useNavigate();
 
+    const services = [
+        "Plumber",
+        "Electrician",
+        "Carpenter",
+        "Painter",
+        "Cleaner",
+        "Housekeeper",
+        "Mechanic",
+        "Bike Mechanic",
+        "Auto Electrician",
+        "Architect",
+        "Interior Designer",
+        "Welder",
+        "Fabricator",
+        "Glazier",
+        "Glass Installer",
+        "Telecommunication Technician",
+        "CCTV Installer",
+        "Network Technician",
+        "Fiber Optic Technician",
+        "AC Technician",
+        "Appliance Repair Technician",
+        "Solar Panel Installer",
+        "Gardener",
+        "Pest Control Technician",
+        "Mason",
+        "Civil Contractor",
+        "Tile Installer",
+        "POP Contractor",
+        "Steel Worker",
+        "Locksmith",
+        "Furniture Assembler",
+        "Mover",
+        "Packer"
+    ];
+
+    const days = [
+        "Monday",
+        "Tuesday",
+        "Wednesday",
+        "Thursday",
+        "Friday",
+        "Saturday",
+        "Sunday"
+    ];
+
     const [form, setForm] = useState({
         name: "",
         email: "",
@@ -32,17 +78,6 @@ export default function Register()
 
     const [uploading, setUploading] = useState(false);
     const [message, setMessage] = useState("");
-
-    const days =
-    [
-        "Monday",
-        "Tuesday",
-        "Wednesday",
-        "Thursday",
-        "Friday",
-        "Saturday",
-        "Sunday"
-    ];
 
     function handleChange(e)
     {
@@ -326,21 +361,17 @@ export default function Register()
                                     Select Expertise
                                 </option>
 
-                                <option value="Plumber">
-                                    Plumber
-                                </option>
-
-                                <option value="Electrician">
-                                    Electrician
-                                </option>
-
-                                <option value="Carpenter">
-                                    Carpenter
-                                </option>
-
-                                <option value="Painter">
-                                    Painter
-                                </option>
+                                {
+                                    services.map((service) =>
+                                    (
+                                        <option
+                                            key={service}
+                                            value={service}
+                                        >
+                                            {service}
+                                        </option>
+                                    ))
+                                }
                             </select>
 
                             <input

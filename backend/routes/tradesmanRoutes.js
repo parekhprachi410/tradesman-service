@@ -3,6 +3,42 @@ const Tradesman = require("../models/Tradesman");
 
 const router = express.Router();
 
+const SERVICES = [
+    "Plumber",
+    "Electrician",
+    "Carpenter",
+    "Painter",
+    "Cleaner",
+    "Housekeeper",
+    "Mechanic",
+    "Bike Mechanic",
+    "Auto Electrician",
+    "Architect",
+    "Interior Designer",
+    "Welder",
+    "Fabricator",
+    "Glazier",
+    "Glass Installer",
+    "Telecommunication Technician",
+    "CCTV Installer",
+    "Network Technician",
+    "Fiber Optic Technician",
+    "AC Technician",
+    "Appliance Repair Technician",
+    "Solar Panel Installer",
+    "Gardener",
+    "Pest Control Technician",
+    "Mason",
+    "Civil Contractor",
+    "Tile Installer",
+    "POP Contractor",
+    "Steel Worker",
+    "Locksmith",
+    "Furniture Assembler",
+    "Mover",
+    "Packer"
+];
+
 function isValidPhone(phone)
 {
     return /^[6-9]\d{9}$/.test(phone);
@@ -51,7 +87,51 @@ router.post("/", async (req, res) =>
             });
         }
 
-        const existingProfile = await Tradesman.findOne({ user });
+        if (!SERVICES.includes(service))
+        {
+            return res.status(400).json({
+                message: "Invalid service selected"
+            });
+        }
+
+        if (Number(experience) < 0)
+        {
+            return res.status(400).json({
+                message: "Experience cannot be negative"
+            });
+        }
+
+        if (Number(hourlyRate) <= 0)
+        {
+            return res.status(400).json({
+                message: "Hourly rate must be greater than 0"
+            });
+        }
+
+        if (!availabilityDays || availabilityDays.length === 0)
+        {
+            return res.status(400).json({
+                message: "Please select at least one available day"
+            });
+        }
+
+        if (!availableFrom || !availableTo)
+        {
+            return res.status(400).json({
+                message: "Please select availability time range"
+            });
+        }
+
+        if (availableFrom >= availableTo)
+        {
+            return res.status(400).json({
+                message: "Available from time must be before available to time"
+            });
+        }
+
+        const existingProfile = await Tradesman.findOne({
+            user
+        });
 
         if (existingProfile)
         {
@@ -70,9 +150,9 @@ router.post("/", async (req, res) =>
             city: city.trim(),
             description: description.trim(),
             profileImage: profileImage || "",
-            availabilityDays: availabilityDays || [],
-            availableFrom: availableFrom || "09:00",
-            availableTo: availableTo || "18:00"
+            availabilityDays,
+            availableFrom,
+            availableTo
         });
 
         res.status(201).json({

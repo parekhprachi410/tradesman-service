@@ -1,20 +1,23 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import api from "../services/api";
-import ReviewModal from "../components/ReviewModal";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import api from "../services/api";
+import ReviewModal from "../components/ReviewModal";
 
 export default function Tradesmen()
 {
     const [searchParams] = useSearchParams();
 
     const [tradesmen, setTradesmen] = useState([]);
+
     const [search, setSearch] = useState(
         searchParams.get("service") || ""
     );
-    const [cityFilter, setCityFilter] = useState("");
-    const [selectedDate, setSelectedDate] = useState(null);
+
+    const [cityFilter, setCityFilter] = useState(
+        searchParams.get("city") || ""
+    );
 
     const [selectedTradesman, setSelectedTradesman] = useState(null);
     const [reviewTradesman, setReviewTradesman] = useState(null);
@@ -22,6 +25,7 @@ export default function Tradesmen()
     const [issue, setIssue] = useState("");
     const [preferredDate, setPreferredDate] = useState("");
     const [preferredTime, setPreferredTime] = useState("");
+    const [selectedDate, setSelectedDate] = useState(null);
 
     const [message, setMessage] = useState("");
 
@@ -54,6 +58,15 @@ export default function Tradesmen()
         return `${year}-${month}-${day}`;
     }
 
+    function getDayName(dateString)
+    {
+        const date = new Date(dateString);
+
+        return date.toLocaleDateString("en-US", {
+            weekday: "long"
+        });
+    }
+
     function isDateAvailable(date)
     {
         if (!selectedTradesman)
@@ -66,15 +79,6 @@ export default function Tradesmen()
         });
 
         return selectedTradesman.availabilityDays?.includes(dayName);
-    }
-
-    function getDayName(dateString)
-    {
-        const date = new Date(dateString);
-
-        return date.toLocaleDateString("en-US", {
-            weekday: "long"
-        });
     }
 
     async function handleBooking(e)
@@ -153,7 +157,8 @@ export default function Tradesmen()
         item.name?.toLowerCase().includes(searchText);
 
         const matchesCity =
-        cityFilter === "" || item.city === cityFilter;
+        cityFilter === "" ||
+        item.city?.toLowerCase() === cityFilter.toLowerCase();
 
         return matchesSearch && matchesCity;
     });

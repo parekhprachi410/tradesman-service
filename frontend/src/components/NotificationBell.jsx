@@ -13,6 +13,13 @@ export default function NotificationBell()
         if (user)
         {
             fetchNotifications();
+
+            const interval = setInterval(() =>
+            {
+                fetchNotifications();
+            }, 5000);
+
+            return () => clearInterval(interval);
         }
     }, []);
 
@@ -25,6 +32,22 @@ export default function NotificationBell()
             );
 
             setNotifications(response.data);
+        }
+        catch (error)
+        {
+            console.log(error);
+        }
+    }
+
+    async function markOneAsRead(id)
+    {
+        try
+        {
+            await api.put(
+                `/notifications/${id}/read`
+            );
+
+            fetchNotifications();
         }
         catch (error)
         {
@@ -48,6 +71,21 @@ export default function NotificationBell()
         }
     }
 
+    function getTypeLabel(type)
+    {
+        if (type === "booking")
+        {
+            return "Booking";
+        }
+
+        if (type === "review")
+        {
+            return "Review";
+        }
+
+        return "General";
+    }
+
     const unreadCount = notifications.filter(
         (item) => !item.isRead
     ).length;
@@ -62,7 +100,7 @@ export default function NotificationBell()
 
             <button
                 onClick={() => setOpen(!open)}
-                className="relative"
+                className="relative text-xl"
             >
                 🔔
 
@@ -77,19 +115,23 @@ export default function NotificationBell()
 
             {
                 open && (
-                    <div className="absolute right-0 mt-4 w-80 bg-white text-slate-900 rounded-2xl shadow-xl p-4 z-50">
+                    <div className="absolute right-0 mt-4 w-96 max-h-96 overflow-y-auto bg-white text-slate-900 rounded-2xl shadow-xl p-4 z-50">
 
                         <div className="flex justify-between items-center mb-4">
                             <h3 className="font-bold text-lg">
                                 Notifications
                             </h3>
 
-                            <button
-                                onClick={markAllAsRead}
-                                className="text-sm text-blue-600"
-                            >
-                                Mark all read
-                            </button>
+                            {
+                                notifications.length > 0 && (
+                                    <button
+                                        onClick={markAllAsRead}
+                                        className="text-sm text-blue-600"
+                                    >
+                                        Mark all read
+                                    </button>
+                                )
+                            }
                         </div>
 
                         {
@@ -102,12 +144,27 @@ export default function NotificationBell()
                                 (
                                     <div
                                         key={item._id}
+                                        onClick={() => markOneAsRead(item._id)}
                                         className={
                                             item.isRead
-                                            ? "p-3 border-b text-slate-500"
-                                            : "p-3 border-b bg-blue-50"
+                                            ? "p-3 border-b text-slate-500 cursor-pointer hover:bg-slate-50"
+                                            : "p-3 border-b bg-blue-50 cursor-pointer hover:bg-blue-100"
                                         }
                                     >
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="text-xs bg-slate-200 text-slate-700 px-2 py-1 rounded-full">
+                                                {getTypeLabel(item.type)}
+                                            </span>
+
+                                            {
+                                                !item.isRead && (
+                                                    <span className="text-xs text-blue-600 font-semibold">
+                                                        New
+                                                    </span>
+                                                )
+                                            }
+                                        </div>
+
                                         <p className="text-sm">
                                             {item.message}
                                         </p>
