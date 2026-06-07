@@ -116,13 +116,12 @@ export default function Home()
 
             <div className="max-w-6xl mx-auto text-center">
 
-                <h1 className="text-5xl md:text-7xl font-bold leading-tight text-slate-900 mb-6">
-                    Find Trusted Tradesmen Near You
+                <h1 className="text-2xl md:text-7xl font-semibold leading-tight text-slate-800 mb-8">
+                    Describe the problem. We'll find the right professionals.
                 </h1>
 
-                <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-8">
-                    Connect with plumbers, electricians, mechanics, cleaners,
-                    pest control experts, architects and skilled professionals in your city.
+                <p className="text-xl text-slate-600 max-w-3xl mx-auto mb-4">
+                    Connect with trusted professionals for repairs, services, renovations, and everyday work near you.
                 </p>
 
                 {
@@ -374,7 +373,7 @@ export default function Home()
                         onClick={() => navigate("/tradesmen")}
                         className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 rounded-xl font-semibold"
                     >
-                        Find Tradesmen
+                        Find Experts
                     </button>
 
                     {
@@ -383,7 +382,7 @@ export default function Home()
                                 onClick={() => navigate("/register")}
                                 className="border border-slate-300 px-8 py-4 rounded-xl font-semibold"
                             >
-                                Join as Tradesman
+                                Join as professional
                             </button>
                         )
                     }

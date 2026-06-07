@@ -68,7 +68,7 @@ export default function App()
                         to="/"
                         className="text-3xl font-bold"
                     >
-                        TradeLink
+                        ProHands
                     </Link>
 
                     <div className="flex gap-8 items-center">
@@ -78,7 +78,7 @@ export default function App()
                         </Link>
 
                         <Link to="/tradesmen">
-                            Tradesmen
+                            Experts
                         </Link>
 
                         {

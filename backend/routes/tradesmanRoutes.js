@@ -36,7 +36,23 @@ const SERVICES = [
     "Locksmith",
     "Furniture Assembler",
     "Mover",
-    "Packer"
+    "Packer",
+    "Beautician",
+    "Hair Stylist",
+    "Makeup Artist",
+    "Massage Therapist",
+    "Yoga Instructor",
+    "Personal Trainer",
+    "Physiotherapist",
+    "Home Nurse",
+    "Private Tutor",
+    "Language Trainer",
+    "Music Teacher",
+    "Chartered Accountant",
+    "Tax Consultant",
+    "Legal Advisor",
+    "Photographer",
+    "Videographer"
 ];
 
 function isValidPhone(phone)
@@ -44,7 +60,6 @@ function isValidPhone(phone)
     return /^[6-9]\d{9}$/.test(phone);
 }
 
-// CREATE TRADESMAN PROFILE
 router.post("/", async (req, res) =>
 {
     try
@@ -76,7 +91,7 @@ router.post("/", async (req, res) =>
         )
         {
             return res.status(400).json({
-                message: "All tradesman profile fields are required"
+                message: "All expert profile fields are required"
             });
         }
 
@@ -136,7 +151,7 @@ router.post("/", async (req, res) =>
         if (existingProfile)
         {
             return res.status(400).json({
-                message: "Tradesman profile already exists for this account"
+                message: "Expert profile already exists for this account"
             });
         }
 
@@ -156,20 +171,19 @@ router.post("/", async (req, res) =>
         });
 
         res.status(201).json({
-            message: "Tradesman profile created successfully",
+            message: "Expert profile created successfully",
             tradesman
         });
     }
     catch (error)
     {
         res.status(500).json({
-            message: "Failed to create tradesman profile",
+            message: "Failed to create expert profile",
             error: error.message
         });
     }
 });
 
-// GET ALL TRADESMEN
 router.get("/", async (req, res) =>
 {
     try
@@ -182,13 +196,12 @@ router.get("/", async (req, res) =>
     catch (error)
     {
         res.status(500).json({
-            message: "Failed to fetch tradesmen",
+            message: "Failed to fetch experts",
             error: error.message
         });
     }
 });
 
-// GET TRADESMAN PROFILE BY USER ID
 router.get("/user/:userId", async (req, res) =>
 {
     try
@@ -200,7 +213,7 @@ router.get("/user/:userId", async (req, res) =>
         if (!tradesman)
         {
             return res.status(404).json({
-                message: "Tradesman profile not found"
+                message: "Expert profile not found"
             });
         }
 
@@ -209,13 +222,12 @@ router.get("/user/:userId", async (req, res) =>
     catch (error)
     {
         res.status(500).json({
-            message: "Failed to fetch tradesman profile",
+            message: "Failed to fetch expert profile",
             error: error.message
         });
     }
 });
 
-// UPDATE AVAILABILITY
 router.put("/availability/:userId", async (req, res) =>
 {
     try
@@ -264,7 +276,7 @@ router.put("/availability/:userId", async (req, res) =>
         if (!tradesman)
         {
             return res.status(404).json({
-                message: "Tradesman profile not found"
+                message: "Expert profile not found"
             });
         }
 

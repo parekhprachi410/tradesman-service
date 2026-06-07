@@ -27,7 +27,7 @@ router.post("/", upload.single("image"), async (req, res) =>
         const result = await cloudinary.uploader.upload(
             base64Image,
             {
-                folder: "tradelink_profiles"
+                folder: "ProHands_profiles"
             }
         );
 

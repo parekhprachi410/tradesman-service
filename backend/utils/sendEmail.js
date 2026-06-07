@@ -12,7 +12,7 @@ async function sendEmail(to, subject, html)
     });
 
     await transporter.sendMail({
-        from: `"TradeLink" <${process.env.EMAIL_USER}>`,
+        from: `"ProHands" <${process.env.EMAIL_USER}>`,
         to,
         subject,
         html

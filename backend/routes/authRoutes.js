@@ -200,7 +200,7 @@ router.post("/forgot-password", async (req, res) =>
         `${process.env.FRONTEND_URL}/reset-password/${resetToken}`;
 
         const html = `
-            <h2>Reset your TradeLink password</h2>
+            <h2>Reset your ProHands password</h2>
             <p>Click the link below to reset your password:</p>
             <a href="${resetUrl}">${resetUrl}</a>
             <p>This link expires in 15 minutes.</p>
@@ -208,7 +208,7 @@ router.post("/forgot-password", async (req, res) =>
 
         await sendEmail(
             user.email,
-            "TradeLink Password Reset",
+            "ProHands Password Reset",
             html
         );
 

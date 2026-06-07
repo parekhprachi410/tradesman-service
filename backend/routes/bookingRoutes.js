@@ -20,34 +20,34 @@ function getStatusEmailText(status)
     if (status === "accepted")
     {
         return {
-            subject: "Your TradeLink booking was accepted",
+            subject: "Your ProHands booking was accepted",
             title: "Booking Accepted",
-            message: "Good news! Your booking request has been accepted by the tradesman."
+            message: "Good news! Your booking request has been accepted by the expert."
         };
     }
 
     if (status === "rejected")
     {
         return {
-            subject: "Your TradeLink booking was rejected",
+            subject: "Your ProHands booking was rejected",
             title: "Booking Rejected",
-            message: "Your booking request was rejected by the tradesman."
+            message: "Your booking request was rejected by the expert."
         };
     }
 
     if (status === "in-progress")
     {
         return {
-            subject: "Your TradeLink job has started",
+            subject: "Your ProHands job has started",
             title: "Work Started",
-            message: "The tradesman has started working on your booking."
+            message: "The expert has started working on your booking."
         };
     }
 
     if (status === "completed")
     {
         return {
-            subject: "Your TradeLink job was completed",
+            subject: "Your ProHands job was completed",
             title: "Job Completed",
             message: "Your booking has been marked as completed."
         };
@@ -56,7 +56,7 @@ function getStatusEmailText(status)
     if (status === "cancelled")
     {
         return {
-            subject: "TradeLink booking cancelled",
+            subject: "ProHands booking cancelled",
             title: "Booking Cancelled",
             message: "A booking has been cancelled."
         };
@@ -88,12 +88,12 @@ function bookingDetailsHtml(booking)
 
             ${
                 booking.tradesmanName
-                ? `<p><b>Tradesman:</b> ${booking.tradesmanName}</p>`
+                ? `<p><b>Expert:</b> ${booking.tradesmanName}</p>`
                 : ""
             }
 
             <p style="margin-top:20px;">
-                Please login to your TradeLink dashboard for more details.
+                Please login to your ProHands dashboard for more details.
             </p>
         </div>
     `;
@@ -117,7 +117,7 @@ router.post("/", async (req, res) =>
         if (!selectedTradesman)
         {
             return res.status(404).json({
-                message: "Tradesman not found"
+                message: "Expert not found"
             });
         }
 
@@ -126,7 +126,7 @@ router.post("/", async (req, res) =>
         if (!selectedTradesman.availabilityDays.includes(bookingDay))
         {
             return res.status(400).json({
-                message: `Tradesman is not available on ${bookingDay}`
+                message: `Expert is not available on ${bookingDay}`
             });
         }
 
@@ -136,7 +136,7 @@ router.post("/", async (req, res) =>
         )
         {
             return res.status(400).json({
-                message: `Tradesman is available only from ${selectedTradesman.availableFrom} to ${selectedTradesman.availableTo}`
+                message: `Expert is available only from ${selectedTradesman.availableFrom} to ${selectedTradesman.availableTo}`
             });
         }
 
@@ -156,10 +156,10 @@ router.post("/", async (req, res) =>
 
         await sendEmail(
             selectedTradesman.user.email,
-            "New TradeLink booking request",
+            "New ProHands booking request",
             bookingDetailsHtml({
                 title: "New Booking Request",
-                message: "You have received a new booking request on TradeLink.",
+                message: "You have received a new booking request on ProHands.",
                 service: selectedTradesman.service,
                 issue,
                 preferredDate,

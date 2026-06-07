@@ -40,7 +40,23 @@ const SERVICES = [
     "Locksmith",
     "Furniture Assembler",
     "Mover",
-    "Packer"
+    "Packer",
+    "Beautician",
+    "Hair Stylist",
+    "Makeup Artist",
+    "Massage Therapist",
+    "Yoga Instructor",
+    "Personal Trainer",
+    "Physiotherapist",
+    "Home Nurse",
+    "Private Tutor",
+    "Language Trainer",
+    "Music Teacher",
+    "Chartered Accountant",
+    "Tax Consultant",
+    "Legal Advisor",
+    "Photographer",
+    "Videographer"
 ];
 
 const KNOWN_CITIES = [
@@ -82,7 +98,7 @@ router.get("/test-ai", async (req, res) =>
             [
                 {
                     role: "user",
-                    content: "What profession installs MCB circuit breakers?"
+                    content: "What expert should I call if my hair is frizzy before travelling?"
                 }
             ]
         });
@@ -115,27 +131,27 @@ router.post("/analyze-problem", async (req, res) =>
         const city = extractCity(problem);
 
         const prompt = `
-You are an expert, human-friendly service diagnosis assistant for TradeLink, a local services marketplace.
+You are an expert, human-friendly service diagnosis assistant for ProHands, a local expert marketplace.
 
 Your purpose:
 Help a non-technical customer understand:
-- who they should call,
+- which expert they should contact,
 - whether multiple experts are needed,
 - what work may be involved,
-- what the approximate cost and time could be,
+- what the approximate Indian cost and time could be,
 - what preparation or safety steps they should take.
 
-Available service categories:
+Available expert categories:
 ${SERVICES.join(", ")}
 
 Known cities:
 ${KNOWN_CITIES.join(", ")}
 
 Rules:
-1. Understand the user's meaning, not only exact words.
-2. Pick exactly one primaryService from the available service categories.
-3. If the problem clearly requires more than one expert, add secondaryServices as an array.
-4. secondaryServices must only contain services from the available service categories.
+1. Understand the user's actual need, not only exact words.
+2. Pick exactly one primaryService from the available expert categories.
+3. If more than one expert may be helpful, add secondaryServices as an array.
+4. secondaryServices must only contain services from the available expert categories.
 5. Do not include the same service in both primaryService and secondaryServices.
 6. If no extra expert is needed, secondaryServices must be [].
 7. Extract city only if the user mentions one from known cities.
@@ -156,13 +172,115 @@ Important mappings:
 - internet, router, WiFi, fiber, LAN -> Network Technician
 - AC cooling, AC gas, AC service -> AC Technician
 - building plan, house design, floor plan -> Architect
+- interior layout, room styling, modular design -> Interior Designer
 - glass, mirror, window glass -> Glazier
 - welding, steel, iron gate, fabrication -> Welder or Fabricator
 - exterior colour, wall painting, repainting -> Painter
 - furniture making, cupboard, table, cabinet, wooden work -> Carpenter
+- house shifting, relocation -> Mover, Packer
+- frizzy hair, damaged hair, haircut, hair colour, hair spa, hairstyling, grooming, hair treatment -> Hair Stylist
+- facial, waxing, threading, cleanup, skincare, salon service, glow up, skin care -> Beautician
+- bridal makeup, party makeup, event look, wedding look -> Makeup Artist
+- body pain, relaxation massage, spa therapy, muscle relaxation -> Massage Therapist
+- back pain, knee pain, injury recovery, posture correction, physiotherapy -> Physiotherapist
+- fitness, weight loss, gym routine, strength training -> Personal Trainer
+- yoga, flexibility, breathing, stress relief, meditation -> Yoga Instructor
+- elderly care, patient care, home medical assistance, nursing care -> Home Nurse
+- school subjects, maths, science, exam preparation, tuition -> Private Tutor
+- English speaking, French, Spanish, Hindi learning, language learning -> Language Trainer
+- singing, piano, guitar, music lessons -> Music Teacher
+- GST, income tax, accounting, audit, company filing, bookkeeping -> Chartered Accountant or Tax Consultant
+- legal notice, agreement, property documents, legal advice -> Legal Advisor
+- birthday shoot, wedding shoot, product photos, photo session -> Photographer
+- event video, reels, wedding film, promotional video -> Videographer
 - full renovation may require Civil Contractor, Painter, Carpenter, Electrician, Plumber, Interior Designer depending on details.
 
 Examples:
+
+Input:
+"My hair is frizzy and puffed, I am travelling in 2 days"
+Output:
+{
+  "primaryService": "Hair Stylist",
+  "secondaryServices": ["Beautician"],
+  "city": "",
+  "confidence": 94,
+  "urgency": "medium",
+  "estimatedCost": "₹500 - ₹3000",
+  "estimatedDuration": "1 - 3 hours",
+  "reason": "The user needs urgent hair styling or hair treatment before travel.",
+  "workScope": [
+    "Assess hair texture and frizz level",
+    "Suggest smoothing, hair spa or styling treatment",
+    "Wash, condition and treat the hair",
+    "Style hair suitable for travel"
+  ],
+  "safetyAdvice": "Avoid experimenting with harsh chemicals right before travel."
+}
+
+Input:
+"I need bridal makeup and hairstyle for my wedding"
+Output:
+{
+  "primaryService": "Makeup Artist",
+  "secondaryServices": ["Hair Stylist", "Beautician"],
+  "city": "",
+  "confidence": 96,
+  "urgency": "medium",
+  "estimatedCost": "₹3000 - ₹25000",
+  "estimatedDuration": "2 - 5 hours",
+  "reason": "Wedding makeup requires a makeup artist, while hairstyling and grooming may need hair and beauty experts.",
+  "workScope": [
+    "Discuss bridal look and outfit style",
+    "Prepare skin and base makeup",
+    "Apply bridal makeup",
+    "Style hair for the event",
+    "Final touch-up before the event"
+  ],
+  "safetyAdvice": "Do a trial look in advance and avoid new skincare products right before the wedding."
+}
+
+Input:
+"I have back pain after sitting all day"
+Output:
+{
+  "primaryService": "Physiotherapist",
+  "secondaryServices": ["Yoga Instructor"],
+  "city": "",
+  "confidence": 92,
+  "urgency": "medium",
+  "estimatedCost": "₹500 - ₹2500",
+  "estimatedDuration": "1 - 4 sessions",
+  "reason": "Persistent back pain may need physiotherapy assessment and posture correction.",
+  "workScope": [
+    "Assess pain location and posture",
+    "Check mobility and movement limitations",
+    "Suggest therapy exercises",
+    "Guide safe stretching and posture correction"
+  ],
+  "safetyAdvice": "Avoid heavy lifting and consult a doctor if pain is severe, sudden or spreading to legs."
+}
+
+Input:
+"I need help filing GST and income tax"
+Output:
+{
+  "primaryService": "Chartered Accountant",
+  "secondaryServices": ["Tax Consultant"],
+  "city": "",
+  "confidence": 96,
+  "urgency": "medium",
+  "estimatedCost": "₹1000 - ₹8000",
+  "estimatedDuration": "1 - 5 days",
+  "reason": "GST and income tax filing require accounting and tax expertise.",
+  "workScope": [
+    "Collect income, GST and business documents",
+    "Review tax liability and compliance status",
+    "Prepare required returns",
+    "File returns and share acknowledgement"
+  ],
+  "safetyAdvice": "Do not share OTPs or banking passwords with anyone."
+}
 
 Input:
 "I want to renovate the house, change the exterior colour and make some furniture"
@@ -173,7 +291,7 @@ Output:
   "city": "",
   "confidence": 92,
   "urgency": "low",
-  "estimatedCost": "₹8,000 - ₹50,000",
+  "estimatedCost": "₹8000 - ₹50000",
   "estimatedDuration": "2 - 7 days",
   "reason": "Exterior colour change needs a painter, while making furniture requires carpentry work.",
   "workScope": [
@@ -184,49 +302,6 @@ Output:
     "Build or assemble required furniture"
   ],
   "safetyAdvice": "Cover outdoor items and keep children away from paint, tools and wood-cutting areas."
-}
-
-Input:
-"My bathroom pipe is leaking and the light is not working"
-Output:
-{
-  "primaryService": "Plumber",
-  "secondaryServices": ["Electrician"],
-  "city": "",
-  "confidence": 94,
-  "urgency": "medium",
-  "estimatedCost": "₹500 - ₹2500",
-  "estimatedDuration": "1 - 3 hours",
-  "reason": "The leaking pipe requires plumbing work, while the faulty bathroom light requires electrical repair.",
-  "workScope": [
-    "Inspect the leaking pipe",
-    "Repair or replace damaged pipe/fitting",
-    "Check bathroom electrical point safely",
-    "Repair light wiring or fixture if needed"
-  ],
-  "safetyAdvice": "Avoid touching electrical switches near water and keep the bathroom dry until inspection."
-}
-
-Input:
-"Need CCTV and WiFi setup for my office in Anand"
-Output:
-{
-  "primaryService": "CCTV Installer",
-  "secondaryServices": ["Network Technician"],
-  "city": "Anand",
-  "confidence": 96,
-  "urgency": "medium",
-  "estimatedCost": "₹5,000 - ₹35,000",
-  "estimatedDuration": "4 - 8 hours",
-  "reason": "CCTV installation and WiFi/network setup require both security camera and networking expertise.",
-  "workScope": [
-    "Inspect office layout",
-    "Plan camera and router/access point placement",
-    "Install CCTV cameras and wiring",
-    "Configure DVR/NVR and mobile viewing",
-    "Set up WiFi/network coverage"
-  ],
-  "safetyAdvice": "Keep access to power points and ceiling/wall areas clear before the technician arrives."
 }
 
 User problem:
@@ -254,7 +329,7 @@ Return JSON only:
                 {
                     role: "system",
                     content:
-                    "You are a human-friendly service diagnosis assistant. Always return valid JSON only."
+                    "You are a human-friendly expert diagnosis assistant for ProHands. Always return valid JSON only."
                 },
                 {
                     role: "user",
@@ -316,7 +391,7 @@ Return JSON only:
                 : [],
             safetyAdvice:
                 data.safetyAdvice ||
-                "Avoid attempting risky repairs yourself."
+                "Avoid attempting risky or unsafe work yourself."
         });
     }
     catch (error)

@@ -1,46 +1,11 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../services/api";
+import services from "../data/services";
 
 export default function Register()
 {
     const navigate = useNavigate();
-
-    const services = [
-        "Plumber",
-        "Electrician",
-        "Carpenter",
-        "Painter",
-        "Cleaner",
-        "Housekeeper",
-        "Mechanic",
-        "Bike Mechanic",
-        "Auto Electrician",
-        "Architect",
-        "Interior Designer",
-        "Welder",
-        "Fabricator",
-        "Glazier",
-        "Glass Installer",
-        "Telecommunication Technician",
-        "CCTV Installer",
-        "Network Technician",
-        "Fiber Optic Technician",
-        "AC Technician",
-        "Appliance Repair Technician",
-        "Solar Panel Installer",
-        "Gardener",
-        "Pest Control Technician",
-        "Mason",
-        "Civil Contractor",
-        "Tile Installer",
-        "POP Contractor",
-        "Steel Worker",
-        "Locksmith",
-        "Furniture Assembler",
-        "Mover",
-        "Packer"
-    ];
 
     const days = [
         "Monday",
@@ -334,7 +299,7 @@ export default function Register()
                     </option>
 
                     <option value="tradesman">
-                        Tradesman
+                        Expert
                     </option>
                 </select>
 
@@ -389,7 +354,7 @@ export default function Register()
                                 name="hourlyRate"
                                 type="number"
                                 min="1"
-                                placeholder="Hourly Rate"
+                                placeholder="Hourly Rate / Service Fee"
                                 value={form.hourlyRate}
                                 onChange={handleChange}
                                 className="w-full p-3 mb-4 border rounded-xl"

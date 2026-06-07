@@ -4,6 +4,7 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import api from "../services/api";
 import ReviewModal from "../components/ReviewModal";
+import { serviceCategories } from "../data/services";
 
 export default function Tradesmen()
 {
@@ -81,6 +82,13 @@ export default function Tradesmen()
         return selectedTradesman.availabilityDays?.includes(dayName);
     }
 
+    function clearFilters()
+    {
+        setSearch("");
+        setCityFilter("");
+        setMessage("");
+    }
+
     async function handleBooking(e)
     {
         e.preventDefault();
@@ -152,6 +160,7 @@ export default function Tradesmen()
         const searchText = search.toLowerCase();
 
         const matchesSearch =
+        searchText === "" ||
         item.service?.toLowerCase().includes(searchText) ||
         item.city?.toLowerCase().includes(searchText) ||
         item.name?.toLowerCase().includes(searchText);
@@ -166,14 +175,15 @@ export default function Tradesmen()
     return (
         <div className="min-h-screen bg-slate-100 px-8 py-12">
 
-            <div className="max-w-6xl mx-auto">
+            <div className="max-w-7xl mx-auto">
 
-                <h1 className="text-4xl font-bold text-slate-900 mb-4">
-                    Available Tradesmen
+                <h1 className="text-5xl font-bold text-slate-900 mb-4">
+                    Find Experts
                 </h1>
 
-                <p className="text-slate-600 mb-8">
-                    Search and book trusted local professionals.
+                <p className="text-slate-600 mb-8 text-lg">
+                    Browse verified experts across home services, wellness,
+                    education, business support, design, repairs and installations.
                 </p>
 
                 {
@@ -184,11 +194,11 @@ export default function Tradesmen()
                     )
                 }
 
-                <div className="grid md:grid-cols-2 gap-4 mb-10">
+                <div className="grid md:grid-cols-3 gap-4 mb-8">
 
                     <input
                         type="text"
-                        placeholder="Search by service, city or name..."
+                        placeholder="Search experts by skill, city or name..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         className="w-full p-4 rounded-xl border border-slate-300 outline-none focus:ring-2 focus:ring-blue-500"
@@ -215,6 +225,78 @@ export default function Tradesmen()
                             ))
                         }
                     </select>
+
+                    <button
+                        onClick={clearFilters}
+                        className="bg-slate-800 hover:bg-slate-900 text-white p-4 rounded-xl font-semibold"
+                    >
+                        Clear Filters
+                    </button>
+
+                </div>
+
+                <div className="bg-white rounded-2xl shadow-lg p-6 mb-10">
+
+                    <div className="flex justify-between items-center mb-5">
+                        <h2 className="text-2xl font-bold text-slate-900">
+                            Browse by Category
+                        </h2>
+
+                        {
+                            search && (
+                                <p className="text-blue-700 font-semibold">
+                                    Selected: {search}
+                                </p>
+                            )
+                        }
+                    </div>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+                        {
+                            serviceCategories.map((group) =>
+                            (
+                                <div
+                                    key={group.category}
+                                    className="border rounded-2xl p-5 bg-slate-50"
+                                >
+                                    <h3 className="font-bold text-blue-700 mb-3">
+                                        {group.category}
+                                    </h3>
+
+                                    <div className="flex flex-wrap gap-2">
+                                        {
+                                            group.services.map((service) =>
+                                            (
+                                                <button
+                                                    key={service}
+                                                    onClick={() => setSearch(service)}
+                                                    className={
+                                                        search === service
+                                                        ? "bg-blue-600 text-white px-3 py-2 rounded-full text-sm font-semibold"
+                                                        : "bg-white hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-full text-sm border"
+                                                    }
+                                                >
+                                                    {service}
+                                                </button>
+                                            ))
+                                        }
+                                    </div>
+                                </div>
+                            ))
+                        }
+                    </div>
+
+                </div>
+
+                <div className="flex justify-between items-center mb-6">
+
+                    <h2 className="text-2xl font-bold text-slate-900">
+                        Available Experts
+                    </h2>
+
+                    <p className="text-slate-600">
+                        {filteredTradesmen.length} result(s)
+                    </p>
 
                 </div>
 
@@ -349,7 +431,7 @@ export default function Tradesmen()
                 {
                     filteredTradesmen.length === 0 && (
                         <p className="text-center text-slate-600 mt-10">
-                            No tradesmen found.
+                            No experts found.
                         </p>
                     )
                 }
