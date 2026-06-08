@@ -2,23 +2,39 @@ import axios from "axios";
 
 const api = axios.create({
     baseURL:
-    "https://prohands-backend.onrender.com/api"
-});
+    "https://prohands-backend.onrender.com/api",
 
-api.interceptors.request.use((config) =>
-{
-    const token = localStorage.getItem("token");
-
-    if (token)
+    headers:
     {
-        config.headers.Authorization = `Bearer ${token}`;
+        "Content-Type": "application/json"
     }
-
-    return config;
 });
+
+api.interceptors.request.use(
+    (config) =>
+    {
+        const token = localStorage.getItem("token");
+
+        if (token)
+        {
+            config.headers.Authorization =
+            `Bearer ${token}`;
+        }
+
+        return config;
+    },
+
+    (error) =>
+    {
+        return Promise.reject(error);
+    }
+);
 
 api.interceptors.response.use(
-    (response) => response,
+    (response) =>
+    {
+        return response;
+    },
 
     (error) =>
     {
@@ -27,7 +43,9 @@ api.interceptors.response.use(
             localStorage.removeItem("token");
             localStorage.removeItem("user");
 
-            window.dispatchEvent(new Event("authChange"));
+            window.dispatchEvent(
+                new Event("authChange")
+            );
 
             window.location.href = "/login";
         }
